@@ -34,17 +34,13 @@ class TenantController extends Controller
         
         $domainSlug = $originalSlug;
         $counter = 1;
-        $baseHost = parse_url(config('app.url'), PHP_URL_HOST) ?? 'tafrra.com';
-        $baseHost = str_replace('www.', '', $baseHost);
-
         // Ensure uniqueness
-        while (Tenant::where('domain', $domainSlug . '.' . $baseHost)->exists()) {
+        while (Tenant::where('domain', $domainSlug)->exists()) {
             $domainSlug = $originalSlug . '-' . $counter;
             $counter++;
         }
 
-        $fullDomain = $domainSlug . '.' . $baseHost;
-        $request->merge(['domain' => $fullDomain]);
+        $request->merge(['domain' => $domainSlug]);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -90,13 +86,9 @@ class TenantController extends Controller
     {
         $domainSlug = clone $request; // To prevent mutating original
         
-        // If domain doesn't have a dot, assume it's just a slug
-        if (!str_contains($request->input('domain'), '.')) {
-            $domainSlug = \Illuminate\Support\Str::slug($request->input('domain') ?: $tenant->name);
-            $baseHost = parse_url(config('app.url'), PHP_URL_HOST) ?? 'tafrra.com';
-            $baseHost = str_replace('www.', '', $baseHost);
-            $request->merge(['domain' => $domainSlug . '.' . $baseHost]);
-        }
+        // Domain is now just a slug
+        $domainSlug = \Illuminate\Support\Str::slug($request->input('domain') ?: $tenant->name);
+        $request->merge(['domain' => $domainSlug]);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',

@@ -19,7 +19,7 @@
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50/50 dark:bg-gray-800/50 dark:text-gray-400">
                     <tr>
                         <th scope="col" class="px-6 py-4 font-medium">اسم الجمعية</th>
-                        <th scope="col" class="px-6 py-4 font-medium">النطاق</th>
+                                <th scope="col" class="px-6 py-4 font-medium">الرابط المخصص</th>
                         <th scope="col" class="px-6 py-4 font-medium">الباقة</th>
                         <th scope="col" class="px-6 py-4 font-medium">تاريخ الانتهاء</th>
                         <th scope="col" class="px-6 py-4 font-medium">الحالة</th>

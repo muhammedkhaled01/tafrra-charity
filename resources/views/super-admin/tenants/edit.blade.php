@@ -21,14 +21,9 @@
                         @error('name') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="domain" class="block text-sm font-medium text-gray-700 dark:text-gray-300">النطاق الفرعي (يُكتب بالإنجليزية)</label>
-                        <div class="mt-2 flex rounded-xl shadow-sm" dir="ltr">
-                            <input type="text" name="domain" id="domain" value="{{ old('domain', explode('.', $tenant->domain)[0] ?? '') }}" required
-                                class="block w-full flex-1 rounded-l-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-brand-500 focus:ring-brand-500 sm:text-sm py-2.5 px-4">
-                            <span class="inline-flex items-center rounded-r-xl border border-l-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 text-gray-500 dark:text-gray-400 sm:text-sm">
-                                .{{ str_replace('www.', '', parse_url(config('app.url', 'http://tafrra.com'), PHP_URL_HOST)) }}
-                            </span>
-                        </div>
+                        <label for="domain" class="block text-sm font-medium text-gray-700 dark:text-gray-300">الرابط المخصص (باللغة الإنجليزية)</label>
+                        <input type="text" name="domain" id="domain" value="{{ old('domain', $tenant->domain) }}" required dir="ltr"
+                            class="mt-2 block w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm transition-colors py-2.5 px-4">
                         @error('domain') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                     </div>
                     <div>
