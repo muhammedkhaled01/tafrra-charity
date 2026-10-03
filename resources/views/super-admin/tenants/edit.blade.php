@@ -33,8 +33,16 @@
                     </div>
                     <div>
                         <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300">المدينة</label>
-                        <input type="text" name="city" id="city" value="{{ old('city', $tenant->city) }}" required
-                            class="mt-2 block w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm transition-colors py-2.5 px-4">
+                        <select name="city" id="city" required class="mt-2 block w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm transition-colors py-2.5 px-4">
+                            <option value="">اختر المدينة...</option>
+                            @php
+                                $saudiCities = ['الرياض', 'جدة', 'مكة المكرمة', 'المدينة المنورة', 'الدمام', 'الطائف', 'بريدة', 'تبوك', 'أبها', 'خميس مشيط', 'حائل', 'حفر الباطن', 'الجبيل', 'الخرج', 'جازان', 'نجران', 'ينبع', 'القنفذة', 'عرعر', 'سكاكا', 'القطيف', 'الظهران', 'الخبر', 'الباحة', 'بيشة', 'الزلفي', 'محايل عسير', 'العلا', 'ضباء', 'طريف', 'القريات'];
+                                sort($saudiCities);
+                            @endphp
+                            @foreach($saudiCities as $c)
+                                <option value="{{ $c }}" {{ old('city', $tenant->city) === $c ? 'selected' : '' }}>{{ $c }}</option>
+                            @endforeach
+                        </select>
                         @error('city') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                     </div>
                     <div>
@@ -60,4 +68,32 @@
             </div>
         </form>
     </div>
+    </div>
+
+    @push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <style>
+        .ts-control { border-radius: 0.75rem !important; border-color: #d1d5db !important; padding: 0.625rem 1rem !important; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important; font-family: 'Inter', 'Cairo', sans-serif; }
+        .dark .ts-control { background-color: #1f2937 !important; border-color: #374151 !important; color: white !important; }
+        .dark .ts-dropdown { background-color: #1f2937 !important; border-color: #374151 !important; color: white !important; }
+        .dark .ts-dropdown .option { color: white !important; }
+        .dark .ts-dropdown .option:hover, .dark .ts-dropdown .option.active { background-color: #374151 !important; color: white !important; }
+    </style>
+    @endpush
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new TomSelect("#city", {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                },
+                placeholder: 'ابحث عن المدينة...',
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>
