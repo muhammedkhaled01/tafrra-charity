@@ -22,7 +22,7 @@ class ExportService
     public function exportToPdf(array $filters)
     {
         $tenant = auth()->user()->tenant;
-        
+
         // Use the same query logic as Excel for consistency
         $export = new BeneficiariesExport($filters);
         $beneficiaries = $export->query()->get();
@@ -31,7 +31,7 @@ class ExportService
         $pdf = PDF::loadView('exports.pdf.beneficiaries', [
             'beneficiaries' => $beneficiaries,
             'tenant' => $tenant,
-            'date' => now()->format('Y-m-d')
+            'date' => now()->format('Y-m-d'),
         ], [], [
             'mode' => 'utf-8',
             'format' => 'A4',

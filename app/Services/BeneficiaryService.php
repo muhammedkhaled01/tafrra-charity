@@ -9,24 +9,24 @@ class BeneficiaryService
 {
     /**
      * Create a new Beneficiary
-     * 
+     *
      * @throws SubscriptionLimitExceededException
      */
     public function create(array $data): Beneficiary
     {
         // Enforce subscription limits
         $tenant = auth()->user()->tenant;
-        
+
         if ($tenant && $tenant->subscription) {
             $max = $tenant->subscription->max_beneficiaries;
-            
+
             // Check if there is a limit (max != -1)
             if ($max !== -1) {
                 // TenantScope automatically filters by the current tenant
                 $currentCount = Beneficiary::count();
-                
+
                 if ($currentCount >= $max) {
-                    throw new SubscriptionLimitExceededException();
+                    throw new SubscriptionLimitExceededException;
                 }
             }
         }
@@ -46,7 +46,7 @@ class BeneficiaryService
     /**
      * Delete a Beneficiary
      */
-    public function delete(Beneficiary $beneficiary): bool|null
+    public function delete(Beneficiary $beneficiary): ?bool
     {
         return $beneficiary->delete();
     }

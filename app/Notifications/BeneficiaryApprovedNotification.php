@@ -12,9 +12,7 @@ class BeneficiaryApprovedNotification extends Notification implements ShouldQueu
 {
     use Queueable;
 
-    public function __construct(public Project $project)
-    {
-    }
+    public function __construct(public Project $project) {}
 
     public function via(object $notifiable): array
     {

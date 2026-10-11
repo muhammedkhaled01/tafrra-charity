@@ -17,6 +17,7 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "@rushdi94/gregorian-hijri-datepicker": "^1.0.10",
         "alpinejs": "^3.17.4",
         "apexcharts": "^7.8.0"
     }

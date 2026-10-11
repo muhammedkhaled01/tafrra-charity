@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BeneficiaryCategory;
+use App\Enums\BeneficiaryStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,19 +28,26 @@ class UpdateBeneficiaryRequest extends FormRequest
                         return $query->where('tenant_id', auth()->user()->tenant_id);
                     }),
             ],
-            'name' => 'sometimes|string|max:255',
+            'first_name' => 'sometimes|string|max:255',
+            'father_name' => 'nullable|string|max:255',
+            'grandfather_name' => 'nullable|string|max:255',
+            'family_name' => 'sometimes|string|max:255',
             'phone' => [
                 'sometimes',
                 'string',
                 'regex:/^(05|9665|\+9665)\d{8}$/',
             ],
-            'dob' => 'sometimes|date|before:today',
+            'dob' => 'sometimes|string|regex:/^\d{4}-\d{2}-\d{2}$/',
+            'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
+            'monthly_income' => 'nullable|numeric|min:0',
             'city' => 'sometimes|string|max:255',
-            'gender' => ['sometimes', 'string', Rule::in(array_column(\App\Enums\Gender::cases(), 'value'))],
-            'category' => ['sometimes', 'string', Rule::in(array_column(\App\Enums\BeneficiaryCategory::cases(), 'value'))],
+            'neighborhood' => 'nullable|string|max:255',
+            'marital_status' => 'sometimes|string|max:255',
+            'category' => ['sometimes', 'string', Rule::in(array_column(BeneficiaryCategory::cases(), 'value'))],
             'family_members' => 'sometimes|integer|min:1',
-            'monthly_income' => 'sometimes|numeric|min:0',
-            'status' => ['sometimes', 'string', Rule::in(array_column(\App\Enums\BeneficiaryStatus::cases(), 'value'))],
+            'status' => ['sometimes', 'string', Rule::in(array_column(BeneficiaryStatus::cases(), 'value'))],
+            'notes' => 'nullable|string',
+            'goals' => 'nullable|string',
         ];
     }
 

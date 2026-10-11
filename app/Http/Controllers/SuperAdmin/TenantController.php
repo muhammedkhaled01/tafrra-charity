@@ -2,41 +2,53 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Enums\RoleName;
 use App\Http\Controllers\Controller;
-use App\Models\Tenant;
 use App\Models\Subscription;
+use App\Models\Tenant;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class TenantController extends Controller
 {
     public function index()
     {
-        $tenants = Tenant::with('subscription')->latest()->paginate(15);
+        $tenants = Tenant::with('subscription')->withCount('beneficiaries')->latest()->paginate(15);
+
         return view('super-admin.tenants.index', compact('tenants'));
+    }
+
+    public function show(Tenant $tenant)
+    {
+        $tenant->load(['subscription', 'users']);
+        $tenant->loadCount(['beneficiaries', 'projects', 'donors', 'payments']);
+
+        return view('super-admin.tenants.show', compact('tenant'));
     }
 
     public function create()
     {
         $subscriptions = Subscription::all();
+
         return view('super-admin.tenants.create', compact('subscriptions'));
     }
 
     public function store(Request $request)
     {
         // Auto-generate a unique domain slug from the name
-        $originalSlug = \Illuminate\Support\Str::slug($request->input('name') ?: 'charity');
+        $originalSlug = Str::slug($request->input('name') ?: 'charity');
         if (empty($originalSlug)) {
             $originalSlug = 'charity';
         }
-        
+
         $domainSlug = $originalSlug;
         $counter = 1;
         // Ensure uniqueness
         while (Tenant::where('domain', $domainSlug)->exists()) {
-            $domainSlug = $originalSlug . '-' . $counter;
+            $domainSlug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -71,7 +83,7 @@ class TenantController extends Controller
             'password' => Hash::make($validated['admin_password']),
         ]);
 
-        $user->assignRole(\App\Enums\RoleName::CharityAdmin->value);
+        $user->assignRole(RoleName::CharityAdmin->value);
 
         return redirect()->route('super-admin.tenants.index')->with('success', 'Charity created and admin generated.');
     }
@@ -79,20 +91,21 @@ class TenantController extends Controller
     public function edit(Tenant $tenant)
     {
         $subscriptions = Subscription::all();
+
         return view('super-admin.tenants.edit', compact('tenant', 'subscriptions'));
     }
 
     public function update(Request $request, Tenant $tenant)
     {
         $domainSlug = clone $request; // To prevent mutating original
-        
+
         // Domain is now just a slug
-        $domainSlug = \Illuminate\Support\Str::slug($request->input('domain') ?: $tenant->name);
+        $domainSlug = Str::slug($request->input('domain') ?: $tenant->name);
         $request->merge(['domain' => $domainSlug]);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'domain' => 'required|string|unique:tenants,domain,' . $tenant->id,
+            'domain' => 'required|string|unique:tenants,domain,'.$tenant->id,
             'subscription_id' => 'required|exists:subscriptions,id',
             'subscription_expires_at' => 'required|date',
             'city' => 'nullable|string|max:255',

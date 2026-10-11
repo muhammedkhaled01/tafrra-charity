@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Beneficiary;
+use App\Models\Tenant;
+use App\Observers\BeneficiaryObserver;
+use App\Observers\TenantObserver;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Model::preventLazyLoading(! app()->isProduction());
+
+        Tenant::observe(TenantObserver::class);
+        Beneficiary::observe(BeneficiaryObserver::class);
     }
 }

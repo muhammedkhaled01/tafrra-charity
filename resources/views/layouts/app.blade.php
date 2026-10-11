@@ -50,23 +50,66 @@
                             الجمعيات الخيرية
                         </x-nav-link>
                         <x-nav-link href="{{ route('super-admin.payments.index') }}" :active="request()->routeIs('super-admin.payments.*')" icon="credit-card">
-                            المدفوعات والاشتراكات
+                            سجل المدفوعات
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('super-admin.subscriptions.index') }}" :active="request()->routeIs('super-admin.subscriptions.*')" icon="folder">
+                            إدارة باقات الاشتراك
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('super-admin.subscription-requests.index') }}" :active="request()->routeIs('super-admin.subscription-requests.*')" icon="folder">
+                            طلبات الاشتراك
                         </x-nav-link>
                         <x-nav-link href="{{ route('super-admin.roles.index') }}" :active="request()->routeIs('super-admin.roles.*')" icon="folder">
                             إدارة الصلاحيات والمدراء
                         </x-nav-link>
-                        <x-nav-link href="#" icon="folder">
+                        <x-nav-link href="{{ route('super-admin.users.index') }}" :active="request()->routeIs('super-admin.users.*')" icon="users">
+                            إدارة المستخدمين
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('super-admin.settings.seo') }}" :active="request()->routeIs('super-admin.settings.*')" icon="folder">
                             إعدادات الموقع (SEO)
                         </x-nav-link>
                     @else
                         <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
                             الرئيسية
                         </x-nav-link>
+
+                        @if(auth()->user()->hasFeature('beneficiaries'))
                         <x-nav-link href="{{ route('beneficiaries.index') }}" :active="request()->routeIs('beneficiaries.*')" icon="users">
                             المستفيدين
                         </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->hasFeature('donors'))
+                        <x-nav-link href="{{ route('donors.index') }}" :active="request()->routeIs('donors.*')" icon="users">
+                            الداعمين والكفلاء
+                        </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->hasFeature('sponsorships'))
+                        <x-nav-link href="{{ route('sponsorships.index') }}" :active="request()->routeIs('sponsorships.*')" icon="folder">
+                            إدارة الكفالات
+                        </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->hasFeature('transactions'))
+                        <x-nav-link href="{{ route('transactions.index') }}" :active="request()->routeIs('transactions.*')" icon="folder">
+                            سندات القبض والصرف
+                        </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->hasFeature('projects'))
                         <x-nav-link href="{{ route('projects.index') }}" :active="request()->routeIs('projects.*')" icon="folder">
                             المشاريع
+                        </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->hasFeature('documents'))
+                        <x-nav-link href="{{ route('documents.index') }}" :active="request()->routeIs('documents.*')" icon="folder">
+                            الخطابات والعقود
+                        </x-nav-link>
+                        @endif
+
+                        <x-nav-link href="{{ route('settings.edit') }}" :active="request()->routeIs('settings.*')" icon="folder">
+                            إعدادات الجمعية
                         </x-nav-link>
                     @endif
                 </nav>
@@ -98,11 +141,12 @@
                         <!-- Search can go here -->
                     </div>
                     <div class="ml-4 flex items-center gap-4">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-300 flex items-center justify-center font-bold text-sm">
-                                {{ substr(auth()->user()->name, 0, 1) }}
+                        <div class="flex items-center gap-3 px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-inner">
+                                {{ mb_substr(auth()->user()->name, 0, 1, 'UTF-8') }}
                             </div>
-                            <span class="text-sm font-medium hidden md:block">{{ auth()->user()->name }}</span>
+                            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200 hidden md:block">{{ auth()->user()->name }}</span>
+                            <svg class="w-4 h-4 text-gray-400 hidden md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </div>
                 </div>
@@ -135,6 +179,34 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
+            color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#111827',
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        @if(session('success'))
+            Toast.fire({
+                icon: 'success',
+                title: '{{ session('success') }}'
+            });
+        @endif
+
+        @if(session('error'))
+            Toast.fire({
+                icon: 'error',
+                title: '{{ session('error') }}'
+            });
+        @endif
+
         function confirmDelete(event, form, itemName = 'هذا العنصر') {
             event.preventDefault();
             Swal.fire({

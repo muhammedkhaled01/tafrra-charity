@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BeneficiaryCategory;
+use App\Enums\BeneficiaryStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,18 +26,26 @@ class StoreBeneficiaryRequest extends FormRequest
                     return $query->where('tenant_id', auth()->user()->tenant_id);
                 }),
             ],
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'father_name' => 'nullable|string|max:255',
+            'grandfather_name' => 'nullable|string|max:255',
+            'family_name' => 'required|string|max:255',
             'phone' => [
                 'required',
                 'string',
                 'regex:/^(05|9665|\+9665)\d{8}$/',
             ],
-            'dob' => 'required|date|before:today',
+            'dob' => 'required|string|regex:/^\d{4}-\d{2}-\d{2}$/',
+            'gender' => ['nullable', 'string', Rule::in(['male', 'female'])],
+            'monthly_income' => 'nullable|numeric|min:0',
             'city' => 'required|string|max:255',
-            'gender' => ['required', 'string', Rule::in(array_column(\App\Enums\Gender::cases(), 'value'))],
-            'category' => ['required', 'string', Rule::in(array_column(\App\Enums\BeneficiaryCategory::cases(), 'value'))],
+            'neighborhood' => 'nullable|string|max:255',
+            'marital_status' => 'required|string|max:255',
+            'category' => ['required', 'string', Rule::in(array_column(BeneficiaryCategory::cases(), 'value'))],
             'family_members' => 'required|integer|min:1',
-            'monthly_income' => 'required|numeric|min:0',
+            'status' => ['required', 'string', Rule::in(array_column(BeneficiaryStatus::cases(), 'value'))],
+            'notes' => 'nullable|string',
+            'goals' => 'nullable|string',
         ];
     }
 

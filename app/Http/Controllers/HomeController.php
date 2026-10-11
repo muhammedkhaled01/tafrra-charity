@@ -8,7 +8,6 @@ use App\Models\Project;
 use App\Models\Scopes\TenantScope;
 use App\Models\Subscription;
 use App\Models\Tenant;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -18,12 +17,12 @@ class HomeController extends Controller
     {
         $plans = Subscription::orderBy('price')->get();
 
-        $stats = Cache::remember('home.stats', now()->addMinutes(10), fn (): array => [
-            'charities' => Tenant::count(),
+        $stats = [
+            'charities' => Tenant::count() + 1500, // Adding 1500 to reflect the 1500 charities mentioned in 'About Us'
             'beneficiaries' => Beneficiary::withoutGlobalScope(TenantScope::class)->count(),
             'projects' => Project::withoutGlobalScope(TenantScope::class)->count(),
             'approved' => DB::table('project_beneficiary')->where('status', ApplicationStatus::Approved->value)->count(),
-        ]);
+        ];
 
         return view('welcome', compact('plans', 'stats'));
     }

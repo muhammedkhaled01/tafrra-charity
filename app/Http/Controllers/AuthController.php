@@ -24,12 +24,18 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            $intendedUrl = $request->session()->pull('url.intended');
+
             // Redirect based on role
             if (Auth::user()->isSuperAdmin()) {
                 return redirect()->route('super-admin.dashboard');
             }
 
-            return redirect()->intended(route('dashboard'));
+            if ($intendedUrl && ! $this->isSuperAdminUrl($intendedUrl)) {
+                return redirect()->to($intendedUrl);
+            }
+
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
@@ -45,5 +51,15 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home');
+    }
+
+    /**
+     * Determine whether the given URL points to the super admin area.
+     */
+    protected function isSuperAdminUrl(string $url): bool
+    {
+        $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+
+        return $path === 'super-admin' || str_starts_with($path, 'super-admin/');
     }
 }

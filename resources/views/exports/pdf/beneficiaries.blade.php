@@ -54,10 +54,13 @@
     <table>
         <thead>
             <tr>
-                <th>الهوية الوطنية</th>
+                <th>رقم الهوية</th>
                 <th>الاسم</th>
-                <th>رقم الجوال</th>
+                <th>الجوال</th>
+                <th>تاريخ الميلاد</th>
                 <th>العمر</th>
+                <th>المدينة</th>
+                <th>نوع الحالة</th>
             </tr>
         </thead>
         <tbody>
@@ -66,7 +69,10 @@
                     <td>{{ $beneficiary->national_id }}</td>
                     <td>{{ $beneficiary->name }}</td>
                     <td><span dir="ltr">{{ $beneficiary->phone }}</span></td>
+                    <td><span dir="ltr">{{ $beneficiary->dob ?? '---' }}</span></td>
                     <td>{{ $beneficiary->age }}</td>
+                    <td>{{ $beneficiary->city ?? '---' }}</td>
+                    <td>{{ $beneficiary->category?->label() ?? '---' }}</td>
                 </tr>
             @endforeach
         </tbody>

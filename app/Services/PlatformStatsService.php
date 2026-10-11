@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\Concerns\BuildsMonthlySeries;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class PlatformStatsService
 {
@@ -24,31 +25,33 @@ class PlatformStatsService
      */
     public function kpis(): array
     {
-        $thisMonth = CarbonImmutable::now()->startOfMonth();
-        $lastMonth = $thisMonth->subMonth();
+        return Cache::remember('superadmin.dashboard.kpis', 3600, function () {
+            $thisMonth = CarbonImmutable::now()->startOfMonth();
+            $lastMonth = $thisMonth->subMonth();
 
-        $revenueThisMonth = (float) Payment::where('status', PaymentStatus::Paid)->where('paid_at', '>=', $thisMonth)->sum('amount');
-        $revenueLastMonth = (float) Payment::where('status', PaymentStatus::Paid)->whereBetween('paid_at', [$lastMonth, $thisMonth])->sum('amount');
+            $revenueThisMonth = (float) Payment::where('status', PaymentStatus::Paid)->where('paid_at', '>=', $thisMonth)->sum('amount');
+            $revenueLastMonth = (float) Payment::where('status', PaymentStatus::Paid)->whereBetween('paid_at', [$lastMonth, $thisMonth])->sum('amount');
 
-        $beneficiaries = Beneficiary::withoutGlobalScope(TenantScope::class);
-        $newBeneficiaries = (clone $beneficiaries)->where('created_at', '>=', $thisMonth)->count();
-        $previousBeneficiaries = (clone $beneficiaries)->whereBetween('created_at', [$lastMonth, $thisMonth])->count();
+            $beneficiaries = Beneficiary::withoutGlobalScope(TenantScope::class);
+            $newBeneficiaries = (clone $beneficiaries)->where('created_at', '>=', $thisMonth)->count();
+            $previousBeneficiaries = (clone $beneficiaries)->whereBetween('created_at', [$lastMonth, $thisMonth])->count();
 
-        $activeTenants = Tenant::where('is_active', true)->where('subscription_expires_at', '>', now());
+            $activeTenants = Tenant::where('is_active', true)->where('subscription_expires_at', '>', now());
 
-        return [
-            'total_charities' => Tenant::count(),
-            'active_charities' => (clone $activeTenants)->count(),
-            'total_beneficiaries' => $beneficiaries->count(),
-            'new_beneficiaries' => $newBeneficiaries,
-            'beneficiaries_change' => $this->percentageChange($newBeneficiaries, $previousBeneficiaries),
-            'total_projects' => Project::withoutGlobalScope(TenantScope::class)->count(),
-            'total_users' => User::count(),
-            'mrr' => (float) (clone $activeTenants)->join('subscriptions', 'tenants.subscription_id', '=', 'subscriptions.id')->sum('subscriptions.price'),
-            'revenue_this_month' => $revenueThisMonth,
-            'revenue_change' => $this->percentageChange($revenueThisMonth, $revenueLastMonth),
-            'expiring_soon' => (clone $activeTenants)->where('subscription_expires_at', '<=', now()->addDays(30))->count(),
-        ];
+            return [
+                'total_charities' => Tenant::count(),
+                'active_charities' => (clone $activeTenants)->count(),
+                'total_beneficiaries' => $beneficiaries->count(),
+                'new_beneficiaries' => $newBeneficiaries,
+                'beneficiaries_change' => $this->percentageChange($newBeneficiaries, $previousBeneficiaries),
+                'total_projects' => Project::withoutGlobalScope(TenantScope::class)->count(),
+                'total_users' => User::count(),
+                'mrr' => (float) (clone $activeTenants)->join('subscriptions', 'tenants.subscription_id', '=', 'subscriptions.id')->sum('subscriptions.price'),
+                'revenue_this_month' => $revenueThisMonth,
+                'revenue_change' => $this->percentageChange($revenueThisMonth, $revenueLastMonth),
+                'expiring_soon' => (clone $activeTenants)->where('subscription_expires_at', '<=', now()->addDays(30))->count(),
+            ];
+        });
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Beneficiary;
 use App\Models\Project;
+use App\Notifications\BeneficiaryApprovedNotification;
 
 class ProjectService
 {
@@ -17,7 +18,7 @@ class ProjectService
         return $project->update($data);
     }
 
-    public function delete(Project $project): bool|null
+    public function delete(Project $project): ?bool
     {
         return $project->delete();
     }
@@ -29,7 +30,7 @@ class ProjectService
     {
         // Avoid duplicate attachments using syncWithoutDetaching
         $project->beneficiaries()->syncWithoutDetaching([
-            $beneficiary->id => ['status' => $status]
+            $beneficiary->id => ['status' => $status],
         ]);
     }
 
@@ -46,7 +47,7 @@ class ProjectService
         if ($status === 'approved') {
             $tenant = auth()->user()->tenant;
             if ($tenant && $tenant->hasFeature('whatsapp_api')) {
-                $beneficiary->notify(new \App\Notifications\BeneficiaryApprovedNotification($project));
+                $beneficiary->notify(new BeneficiaryApprovedNotification($project));
             }
         }
     }

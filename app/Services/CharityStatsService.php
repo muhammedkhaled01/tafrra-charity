@@ -35,13 +35,15 @@ class CharityStatsService
         $newThisMonth = Beneficiary::where('created_at', '>=', $thisMonth)->count();
         $newLastMonth = Beneficiary::whereBetween('created_at', [$lastMonth, $thisMonth])->count();
         $applications = $this->applicationsQuery($tenant)->selectRaw('project_beneficiary.status, count(*) as total')->groupBy('project_beneficiary.status')->pluck('total', 'status');
-        $totalBeneficiaries = Beneficiary::count();
+        $totalFamilies = Beneficiary::count();
+        $totalBeneficiaries = Beneficiary::sum('family_members') ?: $totalFamilies;
         $maxBeneficiaries = $tenant->subscription?->max_beneficiaries;
 
         return [
             'total_beneficiaries' => $totalBeneficiaries,
-            'active_beneficiaries' => Beneficiary::where('status', BeneficiaryStatus::Active)->count(),
             'new_this_month' => $newThisMonth,
+            'active_beneficiaries' => Beneficiary::where('status', BeneficiaryStatus::Active)->count(),
+            'total_families' => $totalFamilies,
             'beneficiaries_change' => $this->percentageChange($newThisMonth, $newLastMonth),
             'total_projects' => Project::count(),
             'active_projects' => Project::where('status', ProjectStatus::Active)->count(),

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\RoleName;
+use App\Enums\SubscriptionFeature;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -52,6 +53,19 @@ class User extends Authenticatable
         $role = $this->roles->first();
 
         return $role?->label ?? $role?->name ?? '—';
+    }
+
+    /**
+     * Check if the user's tenant has a specific subscription feature.
+     * Super admins have access to all features.
+     */
+    public function hasFeature(string|SubscriptionFeature $feature): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return (bool) $this->tenant?->hasFeature($feature);
     }
 
     /**

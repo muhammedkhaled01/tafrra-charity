@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SubscriptionFeature;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,9 @@ class Tenant extends Model
         'phone',
         'city',
         'logo',
+        'stamp',
+        'signatures',
+        'license_number',
         'subscription_id',
         'subscription_expires_at',
         'is_active',
@@ -26,6 +30,7 @@ class Tenant extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'subscription_expires_at' => 'datetime',
+        'signatures' => 'array',
     ];
 
     public function subscription(): BelongsTo
@@ -53,6 +58,16 @@ class Tenant extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    public function donors(): HasMany
+    {
+        return $this->hasMany(Donor::class);
+    }
+
     public function hasActiveSubscription(): bool
     {
         return $this->is_active
@@ -72,16 +87,17 @@ class Tenant extends Model
     /**
      * Check if the tenant's subscription includes a specific feature.
      */
-    public function hasFeature(string $featureName): bool
+    public function hasFeature(string|SubscriptionFeature $feature): bool
     {
         $subscription = $this->subscription;
-        
-        if (!$subscription) {
+
+        if (! $subscription) {
             return false;
         }
 
+        $featureName = $feature instanceof SubscriptionFeature ? $feature->value : $feature;
         $features = $subscription->features ?? [];
-        
-        return isset($features[$featureName]) && $features[$featureName] === true;
+
+        return isset($features[$featureName]) && (bool) $features[$featureName];
     }
 }

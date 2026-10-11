@@ -13,14 +13,14 @@ class WhatsAppChannel
     public function send(object $notifiable, Notification $notification): void
     {
         // Ensure the toWhatsApp method exists on the notification
-        if (!method_exists($notification, 'toWhatsApp')) {
+        if (! method_exists($notification, 'toWhatsApp')) {
             return;
         }
 
         $message = $notification->toWhatsApp($notifiable);
         $phoneNumber = $notifiable->routeNotificationFor('whatsapp') ?? $notifiable->phone;
 
-        if (!$phoneNumber) {
+        if (! $phoneNumber) {
             return;
         }
 
@@ -30,10 +30,10 @@ class WhatsAppChannel
             //     'to' => $phoneNumber,
             //     'text' => $message
             // ]);
-            
+
             Log::info("WhatsApp message simulated to {$phoneNumber}: {$message}");
         } catch (\Exception $e) {
-            Log::error("Failed to send WhatsApp message: " . $e->getMessage());
+            Log::error('Failed to send WhatsApp message: '.$e->getMessage());
         }
     }
 }

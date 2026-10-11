@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Project;
-use App\Models\Beneficiary;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Models\Beneficiary;
+use App\Models\Project;
 use App\Services\ProjectService;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    public function __construct(protected ProjectService $projectService)
-    {
-    }
+    public function __construct(protected ProjectService $projectService) {}
 
     public function index()
     {
         $projects = Project::latest()->paginate(15);
+
         return view('projects.index', compact('projects'));
     }
 
@@ -29,6 +28,7 @@ class ProjectController extends Controller
     public function store(StoreProjectRequest $request)
     {
         $project = $this->projectService->create($request->validated());
+
         return redirect()->route('projects.show', $project)->with('success', 'Project created successfully.');
     }
 
@@ -36,6 +36,7 @@ class ProjectController extends Controller
     {
         $project->load('beneficiaries');
         $allBeneficiaries = Beneficiary::select('id', 'name', 'national_id')->get();
+
         return view('projects.show', compact('project', 'allBeneficiaries'));
     }
 
@@ -47,12 +48,14 @@ class ProjectController extends Controller
     public function update(UpdateProjectRequest $request, Project $project)
     {
         $this->projectService->update($project, $request->validated());
+
         return redirect()->route('projects.show', $project)->with('success', 'Project updated successfully.');
     }
 
     public function destroy(Project $project)
     {
         $this->projectService->delete($project);
+
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }
 
@@ -65,11 +68,11 @@ class ProjectController extends Controller
 
         foreach ($request->beneficiaries as $beneficiaryId) {
             $beneficiary = Beneficiary::find($beneficiaryId);
-            if($beneficiary) {
+            if ($beneficiary) {
                 $this->projectService->attachBeneficiary($project, $beneficiary, 'pending');
             }
         }
-        
+
         return back()->with('success', 'تم إضافة المستفيدين للمشروع بنجاح.');
     }
 

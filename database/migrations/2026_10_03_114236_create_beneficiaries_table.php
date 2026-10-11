@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('phone');
             $table->date('dob');
             $table->timestamps();
-            
+
             $table->unique(['tenant_id', 'national_id']);
         });
     }

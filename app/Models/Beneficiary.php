@@ -19,19 +19,25 @@ class Beneficiary extends Model
     protected $fillable = [
         'tenant_id',
         'national_id',
-        'name',
+        'first_name',
+        'father_name',
+        'grandfather_name',
+        'family_name',
         'gender',
+        'marital_status',
         'phone',
         'dob',
         'city',
+        'neighborhood',
         'family_members',
         'monthly_income',
         'category',
         'status',
+        'notes',
+        'goals',
     ];
 
     protected $casts = [
-        'dob' => 'date',
         'gender' => Gender::class,
         'category' => BeneficiaryCategory::class,
         'status' => BeneficiaryStatus::class,
@@ -41,7 +47,32 @@ class Beneficiary extends Model
 
     public function getAgeAttribute(): int
     {
-        return $this->dob ? $this->dob->age : 0;
+        if (! $this->dob) {
+            return 0;
+        }
+
+        $parts = explode('-', $this->dob);
+        if (count($parts) !== 3) {
+            return 0;
+        }
+
+        $hijriYear = (int) $parts[0];
+
+        // Approximate current Hijri year (Current Gregorian - 622 + (Current Gregorian - 622) / 32)
+        $currentYear = (int) date('Y');
+        $currentHijriYear = (int) (($currentYear - 622) + (($currentYear - 622) / 32));
+
+        return max(0, $currentHijriYear - $hijriYear);
+    }
+
+    public function getNameAttribute(): string
+    {
+        return implode(' ', array_filter([
+            $this->first_name,
+            $this->father_name,
+            $this->grandfather_name,
+            $this->family_name,
+        ]));
     }
 
     public function projects(): BelongsToMany
@@ -51,6 +82,11 @@ class Beneficiary extends Model
             ->withTimestamps();
     }
 
+    public function sponsorships()
+    {
+        return $this->hasMany(Sponsorship::class);
+    }
+
     /**
      * Search by name, national ID or phone.
      *
@@ -58,14 +94,27 @@ class Beneficiary extends Model
      */
     public function scopeSearch(Builder $query, ?string $term): void
     {
-        if (blank($term)) {
+        $term = trim((string) $term);
+
+        if ($term === '') {
             return;
         }
 
-        $query->where(function (Builder $query) use ($term): void {
-            $query->where('name', 'like', "%{$term}%")
-                ->orWhere('national_id', 'like', "{$term}%")
-                ->orWhere('phone', 'like', "%{$term}%");
-        });
+        $escapedTerm = addcslashes($term, '\\%_');
+
+        // Phone / ID input: national ID (index-friendly prefix match) or phone; skip the expensive name scan.
+        if (preg_match('/^[\d\s+\-]+$/', $term) === 1) {
+            $query->where(function (Builder $query) use ($escapedTerm): void {
+                $query->where('national_id', 'like', "{$escapedTerm}%")
+                    ->orWhere('phone', 'like', "%{$escapedTerm}%");
+            });
+
+            return;
+        }
+
+        $query->whereRaw(
+            "CONCAT_WS(' ', first_name, father_name, grandfather_name, family_name) LIKE ?",
+            ["%{$escapedTerm}%"]
+        );
     }
 }
