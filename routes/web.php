@@ -9,10 +9,11 @@ use App\Http\Controllers\DonorController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\SponsorshipController;
 use App\Http\Controllers\SubscriptionRequestController;
-use App\Http\Controllers\SuperAdmin;
 // use App\Http\Controllers\TeamController;
+use App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\TenantSettingsController;
 use App\Http\Controllers\TransactionController;
 use App\Models\Beneficiary;
@@ -40,6 +41,8 @@ Route::post('/subscribe/{subscription}', [SubscriptionRequestController::class, 
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login'])->name('login.post');
+    Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 });
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
@@ -48,6 +51,8 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::middleware('feature:beneficiaries')->group(function () {
+        Route::get('beneficiaries/template', [BeneficiaryController::class, 'downloadTemplate'])->name('beneficiaries.template');
+        Route::post('beneficiaries/import', [BeneficiaryController::class, 'import'])->name('beneficiaries.import');
         Route::resource('beneficiaries', BeneficiaryController::class);
     });
 

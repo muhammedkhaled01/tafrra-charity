@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Exports\BeneficiariesExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Meneses\LaravelMpdf\Facades\LaravelMpdf as PDF;
+use Mccarlosen\LaravelMpdf\Facades\LaravelMpdf as PDF;
 
 class ExportService
 {

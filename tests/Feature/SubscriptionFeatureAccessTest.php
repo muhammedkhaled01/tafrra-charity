@@ -74,4 +74,23 @@ class SubscriptionFeatureAccessTest extends TestCase
         $response->assertDontSee(route('projects.index'));
         $response->assertDontSee('المشاريع');
     }
+
+    public function test_tenant_with_exports_feature_can_export_excel_and_pdf(): void
+    {
+        $tenantUser = User::find(6); // جمعية العيش الشامي (has exports = true)
+
+        if (! $tenantUser) {
+            $this->markTestSkipped('Tenant user not found in database.');
+        }
+
+        // Test Excel export
+        $responseExcel = $this->actingAs($tenantUser)
+            ->get(route('exports.beneficiaries', ['format' => 'excel']));
+        $responseExcel->assertStatus(200);
+
+        // Test PDF export
+        $responsePdf = $this->actingAs($tenantUser)
+            ->get(route('exports.beneficiaries', ['format' => 'pdf']));
+        $responsePdf->assertStatus(200);
+    }
 }

@@ -29,7 +29,7 @@ class StoreBeneficiaryRequest extends FormRequest
             'first_name' => 'required|string|max:255',
             'father_name' => 'nullable|string|max:255',
             'grandfather_name' => 'nullable|string|max:255',
-            'family_name' => 'required|string|max:255',
+            'family_name' => 'nullable|string|max:255',
             'phone' => [
                 'required',
                 'string',

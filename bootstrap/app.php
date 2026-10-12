@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 
-        $middleware->redirectUsersTo(fn (Request $request): string => $request->user()?->isSuperAdmin()
+        $middleware->redirectUsersTo(fn (Request $request): string => ($request->user()?->isSuperAdmin() || ! $request->user()?->tenant)
             ? route('super-admin.dashboard')
             : route('dashboard'));
     })

@@ -14,7 +14,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        if ($user->isSuperAdmin()) {
+        if ($user->isSuperAdmin() || ! $user->tenant) {
             return redirect()->route('super-admin.dashboard');
         }
 

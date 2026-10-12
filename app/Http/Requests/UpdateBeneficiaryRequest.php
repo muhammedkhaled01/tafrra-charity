@@ -31,7 +31,7 @@ class UpdateBeneficiaryRequest extends FormRequest
             'first_name' => 'sometimes|string|max:255',
             'father_name' => 'nullable|string|max:255',
             'grandfather_name' => 'nullable|string|max:255',
-            'family_name' => 'sometimes|string|max:255',
+            'family_name' => 'sometimes|nullable|string|max:255',
             'phone' => [
                 'sometimes',
                 'string',

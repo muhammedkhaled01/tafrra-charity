@@ -207,6 +207,20 @@
             });
         @endif
 
+        @if($errors->any())
+            Toast.fire({
+                icon: 'error',
+                title: '{{ $errors->first() }}'
+            });
+        @endif
+
+        @if(session('warning'))
+            Toast.fire({
+                icon: 'warning',
+                title: '{{ session('warning') }}'
+            });
+        @endif
+
         function confirmDelete(event, form, itemName = 'هذا العنصر') {
             event.preventDefault();
             Swal.fire({

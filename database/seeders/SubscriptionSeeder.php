@@ -15,6 +15,7 @@ class SubscriptionSeeder extends Seeder
                 'price' => 99.00,
                 'max_beneficiaries' => 500,
                 'features' => [
+                    'exports' => true,
                     'excel_export' => true,
                     'pdf_export' => false,
                     'whatsapp_api' => false,
@@ -28,6 +29,7 @@ class SubscriptionSeeder extends Seeder
                 'price' => 199.00,
                 'max_beneficiaries' => 2000,
                 'features' => [
+                    'exports' => true,
                     'excel_export' => true,
                     'pdf_export' => true,
                     'whatsapp_api' => true,
@@ -41,6 +43,7 @@ class SubscriptionSeeder extends Seeder
                 'price' => 399.00,
                 'max_beneficiaries' => -1, // Unlimited
                 'features' => [
+                    'exports' => true,
                     'excel_export' => true,
                     'pdf_export' => true,
                     'whatsapp_api' => true,

@@ -20,6 +20,7 @@ class SubscriptionFactory extends Factory
             'price' => fake()->randomElement([99, 199, 399]),
             'max_beneficiaries' => 500,
             'features' => [
+                'exports' => true,
                 'excel_export' => true,
                 'pdf_export' => false,
                 'whatsapp_api' => false,

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\RoleName;
+use App\Enums\RoleScope;
 use App\Enums\SubscriptionFeature;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'avatar',
     ];
 
     protected $hidden = [
@@ -42,7 +45,11 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole(RoleName::SuperAdmin->value);
+        if ($this->hasRole(RoleName::SuperAdmin->value)) {
+            return true;
+        }
+
+        return $this->tenant_id === null && $this->roles->contains(fn ($role) => $role->scope === RoleScope::Platform->value);
     }
 
     /**

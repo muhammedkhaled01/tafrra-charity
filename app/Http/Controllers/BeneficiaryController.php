@@ -2,15 +2,77 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BeneficiariesTemplateExport;
 use App\Http\Requests\StoreBeneficiaryRequest;
 use App\Http\Requests\UpdateBeneficiaryRequest;
+use App\Imports\BeneficiariesImport;
 use App\Models\Beneficiary;
 use App\Services\BeneficiaryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BeneficiaryController extends Controller
 {
     public function __construct(protected BeneficiaryService $beneficiaryService) {}
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new BeneficiariesTemplateExport, 'نموذج_استيراد_المستفيدين.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (! in_array($ext, ['xlsx', 'xls', 'csv'])) {
+                        $fail('يجب أن يكون الملف بصيغة Excel (xlsx, xls) أو CSV.');
+                    }
+                },
+            ],
+        ], [
+            'file.required' => 'يرجى اختيار ملف الإكسيل لرفعه.',
+            'file.file' => 'الملف المرفوع غير صالح.',
+            'file.max' => 'حجم الملف يجب ألا يتجاوز 10 ميجابايت.',
+        ]);
+
+        try {
+            $import = new BeneficiariesImport;
+            Excel::import($import, $request->file('file'));
+        } catch (\Throwable $e) {
+            Log::error('Beneficiary import failed: '.$e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return redirect()->route('beneficiaries.index')
+                ->with('error', 'حدث خطأ أثناء قراءة ملف الإكسيل: '.$e->getMessage());
+        }
+
+        $messageParts = [];
+        if ($import->importedCount > 0) {
+            $messageParts[] = "تمت إضافة {$import->importedCount} مستفيد جديد بنجاح.";
+        }
+        if ($import->updatedCount > 0) {
+            $messageParts[] = "تم تحديث بيانات {$import->updatedCount} مستفيد مسجل مسبقاً.";
+        }
+
+        $successMsg = ! empty($messageParts)
+            ? implode(' ', $messageParts)
+            : 'تمت معالجة الملف، لم يتم العثور على سجلات جديدة.';
+
+        if (! empty($import->errors)) {
+            return redirect()->route('beneficiaries.index')
+                ->with('success', $successMsg)
+                ->with('warning', implode(' | ', array_slice($import->errors, 0, 3)));
+        }
+
+        return redirect()->route('beneficiaries.index')->with('success', $successMsg);
+    }
 
     public function index(Request $request)
     {

@@ -1,41 +1,45 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center mb-6">
-            <div class="text-center md:text-right w-full md:w-auto">
-                <h2 class="font-heading font-bold text-3xl text-brand-800 dark:text-white leading-tight mb-2">
-                    المستفيدون
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">إدارة ملفات المستفيدين ومتابعة بياناتهم بسهولة.</p>
-            </div>
-            <div class="flex items-center gap-3 hidden md:flex">
-                @if(auth()->user()->hasFeature('exports'))
-                <!-- Export Excel -->
-                <a id="exportExcelBtn" href="{{ route('exports.beneficiaries', array_merge(request()->query(), ['format' => 'excel'])) }}" class="inline-flex items-center gap-2 bg-green-50 border border-green-100 hover:bg-green-100 text-green-700 px-4 py-2.5 rounded-xl transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    إكسيل
-                </a>
-                <!-- Export PDF -->
-                <a id="exportPdfBtn" href="{{ route('exports.beneficiaries', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="inline-flex items-center gap-2 bg-red-50 border border-red-100 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-xl transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                    PDF
-                </a>
-                @endif
-                <!-- Add New -->
-                <a href="{{ route('beneficiaries.create') }}" class="inline-flex items-center gap-2 bg-brand-800 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-brand-900/20 text-sm font-medium">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    إضافة مستفيد
-                </a>
-            </div>
-        </div>
-    </x-slot>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="font-heading font-bold text-3xl text-brand-800 dark:text-white leading-tight mb-1">
+                        المستفيدون
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">إدارة ملفات المستفيدين واستيرادها ومتابعة بياناتهم بسهولة.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <!-- Download Template -->
+                    <a href="{{ route('beneficiaries.template') }}" 
+                       class="group inline-flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-blue-50/60 dark:hover:bg-blue-950/20 text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 px-4 py-2.5 rounded-2xl border border-gray-200/90 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600/50 text-sm font-semibold transition-all duration-200 shadow-xs hover:shadow" 
+                       title="تحميل ملف إكسيل فارغ لتعبئة بيانات المستفيدين">
+                        <span class="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center transition-transform group-hover:scale-110">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        </span>
+                        <span>تحميل النموذج</span>
+                    </a>
 
-    <!-- Mobile Add Button -->
-    <div class="md:hidden mb-6">
-        <a href="{{ route('beneficiaries.create') }}" class="w-full flex items-center justify-center gap-2 bg-brand-800 hover:bg-brand-700 text-white px-5 py-3 rounded-xl transition-colors shadow-lg shadow-brand-900/20 text-sm font-medium">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            إضافة مستفيد
-        </a>
-    </div>
+                    <!-- Import Excel Modal Trigger -->
+                    <button type="button" 
+                            id="openImportModalBtn"
+                            onclick="window.dispatchEvent(new CustomEvent('open-beneficiaries-modal'))"
+                            @click="$dispatch('open-beneficiaries-modal')" 
+                            class="group inline-flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/20 text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 px-4 py-2.5 rounded-2xl border border-gray-200/90 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600/50 text-sm font-semibold transition-all duration-200 shadow-xs hover:shadow">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-transform group-hover:scale-110">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        </span>
+                        <span>استيراد إكسيل</span>
+                    </button>
+
+                    <!-- Add New (Primary CTA) -->
+                    <a href="{{ route('beneficiaries.create') }}" 
+                       class="inline-flex items-center gap-2 bg-brand-800 hover:bg-brand-700 text-white px-5 py-2.5 rounded-2xl transition-all duration-200 shadow-md shadow-brand-900/20 hover:shadow-lg text-sm font-bold hover:-translate-y-0.5 active:translate-y-0"
+                       style="background-color: #1d624c; color: #ffffff;">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        <span class="text-white">إضافة مستفيد</span>
+                    </a>
+                </div>
+            </div>
+        </x-slot>
 
     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden mb-8">
         <!-- Search and Filters Section -->
@@ -74,10 +78,10 @@
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="ابحث بالاسم، أو رقم الهوية، أو الجوال..." 
                                class="w-full rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-brand-500 focus:ring-brand-500 text-sm py-2.5 pr-10 pl-4 shadow-sm transition-colors">
                     </div>
-                    <div class="flex gap-2">
-                        <button type="submit" class="hidden md:block px-4 py-2.5 bg-brand-50 text-brand-800 rounded-xl hover:bg-brand-100 transition-colors font-medium text-sm">تطبيق</button>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="hidden md:inline-flex items-center justify-center px-5 py-2.5 bg-brand-800 hover:bg-brand-900 text-white rounded-xl font-bold text-sm shadow-xs transition-all duration-200">تطبيق</button>
                         @if(request()->anyFilled(['search', 'city', 'marital_status']))
-                            <a href="{{ route('beneficiaries.index') }}" class="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium text-sm">مسح</a>
+                            <a href="{{ route('beneficiaries.index') }}" class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 hover:bg-rose-50 text-gray-600 hover:text-rose-600 rounded-xl font-semibold text-sm transition-all duration-200">مسح</a>
                         @endif
                     </div>
                 </form>
@@ -147,11 +151,55 @@
                     </tbody>
                 </table>
             </div>
-            @if($beneficiaries->hasPages())
-                <div class="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
-                    {{ $beneficiaries->links() }}
+            <!-- Table Footer: Export Actions & Pagination -->
+            <div class="p-4 sm:px-6 border-t border-gray-100 dark:border-gray-700/80 bg-gray-50/70 dark:bg-gray-900/40 flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- Export Section (Right in RTL) -->
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    @if(auth()->user()->hasFeature('exports'))
+                        <div class="flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span>تصدير السجلات:</span>
+                        </div>
+
+                        <!-- Modern Export Excel Button -->
+                        <a id="exportExcelBtn" href="{{ route('exports.beneficiaries', array_merge(request()->query(), ['format' => 'excel'])) }}" 
+                           class="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs hover:shadow transition-all duration-200"
+                           title="تصدير بيانات المستفيدين إلى ملف إكسيل">
+                            <span class="w-5 h-5 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </span>
+                            <span>تصدير إكسيل</span>
+                        </a>
+
+                        <!-- Modern Export PDF Button -->
+                        <a id="exportPdfBtn" href="{{ route('exports.beneficiaries', array_merge(request()->query(), ['format' => 'pdf'])) }}" 
+                           class="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-rose-800 dark:text-rose-300 bg-white dark:bg-gray-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 shadow-xs hover:shadow transition-all duration-200"
+                           title="تصدير بيانات المستفيدين إلى ملف PDF">
+                            <span class="w-5 h-5 rounded-lg bg-rose-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            </span>
+                            <span>تصدير PDF</span>
+                        </a>
+
+                        <!-- Selection Count Badge -->
+                        <span id="selectedCountBadge" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-50 dark:bg-brand-950/50 text-brand-800 dark:text-brand-300 text-xs font-semibold border border-brand-200/60 dark:border-brand-800/60">
+                            <svg class="w-3.5 h-3.5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>محدد: <strong id="selectedCountNum" class="font-bold">0</strong> مستفيد (سيتم تصديرهم فقط)</span>
+                        </span>
+                    @endif
                 </div>
-            @endif
+
+                <!-- Pagination Section (Left in RTL) -->
+                @if($beneficiaries->hasPages())
+                    <div class="w-full md:w-auto flex justify-center md:justify-end">
+                        {{ $beneficiaries->links() }}
+                    </div>
+                @else
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                        إجمالي النتائج: <strong class="text-gray-800 dark:text-gray-200">{{ $beneficiaries->total() }}</strong> مستفيد
+                    </div>
+                @endif
+            </div>
         @else
             <!-- Empty State -->
             <div class="flex flex-col items-center justify-center py-20 px-4 text-center">
@@ -164,13 +212,184 @@
         @endif
     </div>
 
+    <!-- Import Modal -->
+    <div 
+        x-data="{ importModalOpen: false, selectedFileName: '', isSubmitting: false }"
+        @open-beneficiaries-modal.window="importModalOpen = true; isSubmitting = false"
+        @keydown.escape.window="importModalOpen = false"
+        x-show="importModalOpen" 
+        x-cloak
+        class="fixed inset-0 z-50 overflow-y-auto"
+        aria-labelledby="modal-title" 
+        role="dialog" 
+        aria-modal="true"
+    >
+        <!-- Background overlay (pure backdrop, behind the modal) -->
+        <div 
+            x-show="importModalOpen" 
+            x-transition:enter="ease-out duration-300" 
+            x-transition:enter-start="opacity-0" 
+            x-transition:enter-end="opacity-100" 
+            x-transition:leave="ease-in duration-200" 
+            x-transition:leave-start="opacity-100" 
+            x-transition:leave-end="opacity-0" 
+            @click="importModalOpen = false" 
+            class="fixed inset-0 bg-gray-950/60 backdrop-blur-xs transition-opacity z-10" 
+            aria-hidden="true"
+        ></div>
+
+        <!-- Modal Dialog Wrapper (Above backdrop) -->
+        <div class="fixed inset-0 z-20 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
+                <!-- Modal Panel -->
+                <div 
+                    x-show="importModalOpen" 
+                    x-transition:enter="ease-out duration-300" 
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                    x-transition:leave="ease-in duration-200" 
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                    class="relative w-full max-w-xl rounded-3xl bg-white dark:bg-gray-800 text-right shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden transform transition-all z-30"
+                    @click.stop
+                >
+                    <form action="{{ route('beneficiaries.import') }}" method="POST" enctype="multipart/form-data" @submit="isSubmitting = true">
+                        @csrf
+                        
+                        <!-- Header -->
+                        <div class="px-6 py-5 bg-gradient-to-r from-emerald-500/10 to-brand-500/10 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white" id="modal-title">استيراد المستفيدين من إكسيل</h3>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">إضافة دفعات المستفيدين دفعة واحدة بكل سهولة</p>
+                                </div>
+                            </div>
+                            <button type="button" @click="importModalOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl p-1.5 transition">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="p-6 space-y-5">
+                            <!-- Step 1: Download Template Notice -->
+                            <div class="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                    <span class="font-bold block mb-1">الخطوة الأولى: تحميل النموذج المعتمد</span>
+                                    حمّل نموذج الإكسيل الجاهز واملأ به بيانات المستفيدين ثم ارفعه هنا.
+                                    <div class="mt-2">
+                                        <a href="{{ route('beneficiaries.template') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 dark:text-blue-200 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-blue-300 hover:bg-blue-100 transition shadow-sm">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                            اضغط هنا لتحميل نموذج الإكسيل الفارغ (.xlsx)
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Upload File Area -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                    الخطوة الثانية: اختيار ملف الإكسيل المكتمل
+                                </label>
+                                <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-emerald-500 rounded-2xl p-6 text-center transition bg-gray-50/50 dark:bg-gray-900/50 hover:bg-emerald-50/20 group">
+                                    <!-- Full-cover native file input for 100% reliable click & drag-drop -->
+                                    <input 
+                                        type="file" 
+                                        name="file" 
+                                        id="beneficiaryFileInput"
+                                        accept=".xlsx,.xls,.csv" 
+                                        required 
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        @change="if ($event.target.files.length) { selectedFileName = $event.target.files[0].name; }"
+                                    >
+                                    
+                                    <div class="flex flex-col items-center justify-center relative z-10 pointer-events-none">
+                                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-all"
+                                             :class="selectedFileName ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'">
+                                            <template x-if="!selectedFileName">
+                                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                                </svg>
+                                            </template>
+                                            <template x-if="selectedFileName">
+                                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        
+                                        <p class="text-sm font-bold text-gray-800 dark:text-gray-100" 
+                                           x-text="selectedFileName ? selectedFileName : 'انقر هنا لاختيار الملف أو اسحبه وأفلته هنا'"></p>
+                                        
+                                        <p class="text-xs text-gray-400 mt-1" 
+                                           x-text="selectedFileName ? 'تم اختيار الملف بنجاح - يمكنك الضغط بالأسفل لبدء الاستيراد' : 'يدعم ملفات بصيغة Excel (.xlsx, .xls) أو CSV بحد أقصى 10MB'"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Columns Information Accordion / Guide -->
+                            <div class="rounded-2xl border border-gray-100 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-900/40 text-xs text-gray-600 dark:text-gray-400 space-y-2">
+                                <span class="font-bold text-gray-900 dark:text-white block">الأعمدة المدعومة في النموذج:</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-medium text-emerald-700 dark:text-emerald-400">رقم الهوية *</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-medium">الاسم الكامل *</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-medium text-emerald-700 dark:text-emerald-400">رقم الجوال *</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-medium">تاريخ الميلاد *</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">الجنس</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">الحالة الاجتماعية</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">المدينة</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">أفراد الأسرة</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">الدخل الشهري</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">الفئة</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">الحالة</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-1 leading-normal">* إذا كان رقم الهوية موجوداً مسبقاً في جمعيتك، سيقوم النظام بتحديث بيانات المستفيد تلقائياً دون تكراره.</p>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+                            <button type="button" @click="importModalOpen = false" class="px-5 py-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-100 dark:hover:bg-gray-750 transition-all text-sm">
+                                إلغاء
+                            </button>
+                            <button type="submit" :disabled="isSubmitting" 
+                                    class="inline-flex items-center gap-2 bg-brand-800 hover:bg-brand-700 text-white px-6 py-2.5 rounded-2xl font-bold transition-all shadow-md shadow-brand-900/20 hover:shadow-lg text-sm disabled:opacity-50"
+                                    style="background-color: #1d624c; color: #ffffff;">
+                                <span x-show="!isSubmitting">بدء الاستيراد والإضافة</span>
+                                <span x-show="isSubmitting" class="inline-flex items-center gap-2">
+                                    <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span class="text-white">جاري الاستيراد...</span>
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const openImportModalBtn = document.getElementById('openImportModalBtn');
             const selectAll = document.getElementById('selectAll');
             const checkboxes = document.querySelectorAll('.beneficiary-checkbox');
             const exportExcelBtn = document.getElementById('exportExcelBtn');
             const exportPdfBtn = document.getElementById('exportPdfBtn');
+
+            if (openImportModalBtn) {
+                openImportModalBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.dispatchEvent(new CustomEvent('open-beneficiaries-modal'));
+                });
+            }
 
             // Original hrefs
             const excelBaseHref = exportExcelBtn ? exportExcelBtn.href : '';
@@ -179,10 +398,25 @@
             function updateExportLinks() {
                 if (!exportExcelBtn || !exportPdfBtn) return;
                 
-                const selectedIds = Array.from(checkboxes)
-                    .filter(cb => cb.checked)
-                    .map(cb => cb.value)
-                    .join(',');
+                const selectedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked);
+                const selectedIds = selectedCheckboxes.map(cb => cb.value).join(',');
+                const selectedBadge = document.getElementById('selectedCountBadge');
+                const selectedNum = document.getElementById('selectedCountNum');
+
+                if (selectedCheckboxes.length > 0) {
+                    if (selectedBadge) {
+                        selectedBadge.classList.remove('hidden');
+                        selectedBadge.classList.add('inline-flex');
+                    }
+                    if (selectedNum) {
+                        selectedNum.textContent = selectedCheckboxes.length;
+                    }
+                } else {
+                    if (selectedBadge) {
+                        selectedBadge.classList.add('hidden');
+                        selectedBadge.classList.remove('inline-flex');
+                    }
+                }
 
                 if (selectedIds) {
                     const separatorExcel = excelBaseHref.includes('?') ? '&' : '?';

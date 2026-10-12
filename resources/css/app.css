@@ -27,6 +27,10 @@
 /* Disable automatic dark mode (force light mode) */
 @custom-variant dark (&:where(.dark, .dark *));
 
+[x-cloak] {
+    display: none !important;
+}
+
 @layer utilities {
     .glass {
         @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-800/30;

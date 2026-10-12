@@ -27,7 +27,7 @@ class AuthController extends Controller
             $intendedUrl = $request->session()->pull('url.intended');
 
             // Redirect based on role
-            if (Auth::user()->isSuperAdmin()) {
+            if (Auth::user()->isSuperAdmin() || ! Auth::user()->tenant) {
                 return redirect()->route('super-admin.dashboard');
             }
 

@@ -15,8 +15,12 @@ class ExportController extends Controller
         $format = $request->input('format', 'excel'); // excel or pdf
         $filters = $request->only(['project_id', 'status', 'search', 'city', 'ids']);
 
+        $user = auth()->user();
+        $tenant = $user?->tenant;
+        $hasGeneralExport = $user?->isSuperAdmin() || ($tenant && $tenant->hasFeature('exports'));
+
         if ($format === 'excel') {
-            if (! $tenant->hasFeature('excel_export')) {
+            if (! $hasGeneralExport && (! $tenant || ! $tenant->hasFeature('excel_export'))) {
                 return back()->with('error', 'باقتك الحالية لا تدعم تحميل الإكسيل. يرجى الترقية لباقة أعلى.');
             }
 
@@ -24,7 +28,7 @@ class ExportController extends Controller
         }
 
         if ($format === 'pdf') {
-            if (! $tenant->hasFeature('pdf_export')) {
+            if (! $hasGeneralExport && (! $tenant || ! $tenant->hasFeature('pdf_export'))) {
                 return back()->with('error', 'باقتك الحالية لا تدعم تحميل PDF. يرجى الترقية لباقة أعلى.');
             }
 
